@@ -1,39 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:weatherapp/BlocWeather.dart';
 import 'package:weatherapp/ModelWeather.dart';
-import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:weatherapp/RepositoryWeather.dart';
 
-
-
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         title: 'Beather',
         theme: ThemeData(
-          // This is the theme of your application.
-          //
-          // Try running your application with "flutter run". You'll see the
-          // application has a blue toolbar. Then, without quitting the app, try
-          // changing the primarySwatch below to Colors.green and then invoke
-          // "hot reload" (press "r" in the console where you ran "flutter run",
-          // or simply save your changes to "hot reload" in a Flutter IDE).
-          // Notice that the counter didn't reset back to zero; the application
-          // is not restarted.
           primarySwatch: Colors.deepPurple,
         ),
         home: Scaffold(
           resizeToAvoidBottomInset: false,
-          backgroundColor: Colors.deepOrangeAccent,
+          backgroundColor: Colors.blueGrey,
           body: BlocProvider (
             create: (BuildContext context) => BlocWeather(RepositoryWeather()),
-            child: MyHomePage(),
+            child: const MyHomePage(),
 
           ),
         )
@@ -45,6 +33,8 @@ class MyApp extends StatelessWidget {
 
 
 class MyHomePage extends StatelessWidget {
+  const MyHomePage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
 
@@ -57,67 +47,63 @@ class MyHomePage extends StatelessWidget {
       children: <Widget>[
 
 
-        Center(
-            child: Container(
-              child: FlareActor("assets/WorldSpin.flr", fit: BoxFit.contain, animation: "roll",),
-              height: 300,
-              width: 300,
+        const Center(
+            child: SizedBox(
+              child: Icon(Icons.wb_sunny, size: 320.0,)
             )
         ),
+        const SizedBox(height: 20.0,),
 
 
-        //Curly
+        //BlocBuilder takes in Bloc and state
         BlocBuilder<BlocWeather, StateWeather>(
           builder: (context, state){
             if(state is BlankWeather) {
               return Container(
-                padding: EdgeInsets.only(left: 32, right: 32,),
-                child: Column(
+                padding: const EdgeInsets.only(left: 32, right: 32,),
+                child: Column( //Layout
                   children: <Widget>[
-                    Text("Weather Beather", style: TextStyle(fontSize: 40, fontWeight: FontWeight.w500, color: Colors.white70),),
-                    Text("", style: TextStyle(fontSize: 40, fontWeight: FontWeight.w200, color: Colors.white70),),
-                    SizedBox(height: 24,),
-                    TextFormField(
+                    const Text("Beather Weather", style: TextStyle(fontSize: 42, fontWeight: FontWeight.w600, color: Colors.white),),
+                    const Text("", style: TextStyle(fontSize: 42, fontWeight: FontWeight.w300, color: Colors.white),),
+                    const SizedBox(height: 24,),
+                    TextFormField( //Input field
                       controller: cityController,
-
-                      decoration: InputDecoration(
-
-                        prefixIcon: Icon(Icons.search, color: Colors.white70,),
+                      decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.location_city, color: Colors.white,),
                         enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                            borderRadius: BorderRadius.all(Radius.circular(20)),
                             borderSide: BorderSide(
-                                color: Colors.white70,
+                                color: Colors.white,
                                 style: BorderStyle.solid
                             )
                         ),
-
                         focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                            borderRadius: BorderRadius.all(Radius.circular(20)),
                             borderSide: BorderSide(
-                                color: Colors.blue,
+                                color: Colors.indigoAccent,
                                 style: BorderStyle.solid
                             )
                         ),
 
                         hintText: "Location Name",
-                        hintStyle: TextStyle(color: Colors.white70),
+                        hintStyle: TextStyle(color: Colors.white),
 
                       ),
-                      style: TextStyle(color: Colors.white70),
+                      style: const TextStyle(color: Colors.white),
 
                     ),
 
-                    SizedBox(height: 20,),
-                    Container(
+                    const SizedBox(height: 35,),
+                    SizedBox(
                       width: double.infinity,
                       height: 50,
-                      child: FlatButton(
-                        shape: new RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+                      child: FlatButton( //Button
+                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
                         onPressed: (){
                           weatherBloc.add(LoadWeather(cityController.text));
                         },
-                        color: Colors.lightBlue,
-                        child: Text("Search", style: TextStyle(color: Colors.white70, fontSize: 16),),
+                        color: Colors.indigoAccent,
+                        child: const Text("Search location", style: TextStyle(color: Colors.white, fontSize: 20),),
 
                       ),
                     )
@@ -125,12 +111,13 @@ class MyHomePage extends StatelessWidget {
                   ],
                 ),
               );
-            } else if(state is LoadingWeather)
-              return Center(child : CircularProgressIndicator());
-            else if(state is LoadedWeather)
-              return ShowWeather(state.getWeather, cityController.text);
-            else
-              return Text("Error",style: TextStyle(color: Colors.white),);
+            } else if(state is LoadingWeather) {
+              return const Center(child : CircularProgressIndicator()); ///If it's loading return loading indicator
+            } else if(state is LoadedWeather) {
+              return ShowResult(state.getWeather, cityController.text);
+            } else {
+              return const Text("ERROR...", style: TextStyle(color: Colors.white),);
+            }
           },
         )
 
@@ -138,56 +125,57 @@ class MyHomePage extends StatelessWidget {
     );
   }
 }
+//Show the results view
+class ShowResult extends StatelessWidget {
+  final ModelWeather weather;
+  final String location;
 
-class ShowWeather extends StatelessWidget {
-  ModelWeather weather;
-  final location;
-
-  ShowWeather(this.weather, this.location);
+  const ShowResult(this.weather, this.location, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        padding: EdgeInsets.only(right: 32, left: 32, top: 10),
+    return Container( //Look of the results
+        padding: const EdgeInsets.only(right: 32, left: 32, top: 10),
         child: Column(
           children: <Widget>[
-            Text(location,style: TextStyle(color: Colors.white70, fontSize: 30, fontWeight: FontWeight.bold),),
-            SizedBox(height: 10,),
+            Text(location,style: const TextStyle(color: Colors.white70, fontSize: 30, fontWeight: FontWeight.bold),),
+            const SizedBox(height: 10,),
 
-            Text(weather.getTemperature.round().toString()+"C",style: TextStyle(color: Colors.white70, fontSize: 50),),
-            Text("Temprature",style: TextStyle(color: Colors.white70, fontSize: 14),),
+            Text(weather.getTemperature.round().toString()+"C",style: const TextStyle(color: Colors.white70, fontSize: 50),),
+            const Text("Temprature",style: TextStyle(color: Colors.white70, fontSize: 14),),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Column(
                   children: <Widget>[
-                    Text(weather.getMinimum.round().toString()+"C",style: TextStyle(color: Colors.white70, fontSize: 30),),
-                    Text("Min Temprature",style: TextStyle(color: Colors.white70, fontSize: 14),),
+                    Text(weather.getMinimum.round().toString()+"C",style: const TextStyle(color: Colors.white70, fontSize: 30),),
+                    const Text("Min Temprature",style: TextStyle(color: Colors.white70, fontSize: 14),),
                   ],
                 ),
                 Column(
                   children: <Widget>[
-                    Text(weather.geMaximum.round().toString()+"C",style: TextStyle(color: Colors.white70, fontSize: 30),),
-                    Text("Max Temprature",style: TextStyle(color: Colors.white70, fontSize: 14),),
+                    Text(weather.geMaximum.round().toString()+"C",style: const TextStyle(color: Colors.white70, fontSize: 30),),
+                    const Text("Max Temperature",style: TextStyle(color: Colors.white70, fontSize: 14),),
                   ],
                 ),
               ],
             ),
-            SizedBox(
-              height: 20,
+            const SizedBox(
+              height: 35,
             ),
 
-            Container(
+
+            SizedBox(
               width: double.infinity,
-              height: 50,
-              child: FlatButton(
-                shape: new RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+              height: 60,
+              child: FlatButton( //Button
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
                 onPressed: (){
-                  BlocProvider.of<BlocWeather>(context).add(changeWeather());
+                  BlocProvider.of<BlocWeather>(context).add(ChangeWeather());
                 },
-                color: Colors.lightBlue,
-                child: Text("Search", style: TextStyle(color: Colors.white70, fontSize: 16),),
+                color: Colors.indigoAccent,
+                child: const Text("Search location", style: TextStyle(color: Colors.white, fontSize: 20),),
 
               ),
             )
@@ -198,4 +186,4 @@ class ShowWeather extends StatelessWidget {
 }
 
 
-//https://api.openweathermap.org/data/2.5/weather?q=Zadar&APPID=43ea6baaad7663dc17637e22ee6f78f2
+//https://api.openweathermap.org/data/2.5/weather?q=Zadar&APPID=3da71e800856fb77e48ffabb094bcdd8

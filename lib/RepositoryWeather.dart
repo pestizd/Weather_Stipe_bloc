@@ -3,17 +3,21 @@ import 'dart:convert';
 
 import 'package:weatherapp/ModelWeather.dart';
 
+//Calling the api
 class RepositoryWeather{
-  Future<ModelWeather> getWeather(String location) async{
-    final result = await http.Client().get(Uri.parse('https://api.openweathermap.org/data/2.5/weather?q=$location&APPID=43ea6baaad7663dc17637e22ee6f78f2'));
+  Future<ModelWeather> grabWeather(String location) async{
+    final result = await http.Client().get(Uri.parse('https://api.openweathermap.org/data/2.5/weather?q=$location&APPID=3da71e800856fb77e48ffabb094bcdd8'));
 
     //final url = 'https://api.openweathermap.org';
     //final uri = Uri.https(url, '/data/2.5/weather?q=$location&APPID=43ea6baaad7663dc17637e22ee6f78f2');
     //final result = await http.get(uri);
-    if(result.statusCode != 200)
+
+    ///Checking the response code
+    if(result.statusCode != 200) {
       throw Exception();
+    }
 
-
+    //We return the parsed json
     return parsedJson(result.body);
 
   }

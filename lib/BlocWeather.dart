@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:weatherapp/ModelWeather.dart';
-import 'RepositoryWeather.dart';
+import 'package:weatherapp/RepositoryWeather.dart';
 
 ///We are taking the event and generating the state
 ///Events
@@ -11,15 +11,15 @@ class EventWeather extends Equatable{
 }
 
 class LoadWeather extends EventWeather {
-  final _location;
+  final String _city;
 
-  LoadWeather(this._location);
+  LoadWeather(this._city);
   //If the class is equetable we need to override props
   @override
-  List<Object> get props => [_location];
+  List<Object> get props => [_city];
 }
 
-class changeWeather extends EventWeather {
+class ChangeWeather extends EventWeather {
 
 }
 
@@ -30,7 +30,7 @@ class StateWeather extends Equatable{
 }
 ///1
 class BlankWeather extends StateWeather {
-
+//Nothing here
 }
 ///2
 class LoadingWeather extends StateWeather {
@@ -38,6 +38,7 @@ class LoadingWeather extends StateWeather {
 }
 ///3
 class LoadedWeather extends StateWeather {
+  //final dynamic _weather;
   final _weather;
 
   LoadedWeather(this._weather);
@@ -50,7 +51,7 @@ class LoadedWeather extends StateWeather {
 }
 ///4
 class NotLoadedWeather extends StateWeather {
-
+//Nothing here
 }
 
 ///Bloc --> Passing in the event and the state
@@ -59,22 +60,23 @@ class BlocWeather extends Bloc<EventWeather, StateWeather> {
   ///Instanciating the repo here
   RepositoryWeather repoWeat;
 
-  BlocWeather(this.repoWeat) : super(BlankWeather());
-  
-  //BlocWeather(StateWeather initialState) : super(BlankWeather());
+  BlocWeather(this.repoWeat) : super(BlankWeather()) {
+    on<EventWeather>((EventWeather event, Emitter<StateWeather> emit) {mapEventToState(event);});
+
+  }
+
   ///We must use async while working with a Stream
-  @override
   Stream<StateWeather> mapEventToState(EventWeather event) async* {
     if(event is LoadWeather) {
       yield LoadingWeather();
       //We need to await the response
       try{
-        ModelWeather weather = await repoWeat.getWeather(event._location);
+        ModelWeather weather = await repoWeat.grabWeather(event._city);
         yield LoadedWeather(weather);
       }catch(_){
         yield NotLoadedWeather();
       }
-    }else if(event is changeWeather){
+    }else if(event is ChangeWeather){
       yield BlankWeather();
     }
 
